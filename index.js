@@ -4,10 +4,8 @@ import fetch from "node-fetch";
 const COLORS = "https://nt-cdn.s3.amazonaws.com/colors.json";
 
 // Helpers
-const matchColor = (color1, color2) =>
-  color1 && color1.toLowerCase().includes(color2 && color2.toLowerCase());
-
-const matchHex = (hex1, hex2) => hex1 === hex2;
+const matchColor = ({ check, filter }) =>
+  check && check.toLowerCase().includes(filter && filter.toLowerCase());
 
 /**
  * @param name filter for color name
@@ -22,19 +20,21 @@ const fetchColors = ({ name, hex, compName, compHex }) => {
     .then((colors) =>
       colors.filter((color) => {
         if (name) {
-          return matchColor(color.name, name);
+          return matchColor({ check: color.name, filter: name });
         }
 
         if (hex) {
-          return matchHex(color.hex, hex);
+          return hex === color.hex;
         }
 
         if (compName) {
-          return color.comp.some(({ name }) => matchColor(name, compName));
+          return color.comp.some(({ name }) =>
+            matchColor({ filter: compName, check: name })
+          );
         }
 
         if (compHex) {
-          return color.comp.some(({ hex }) => matchColor(hex, compHex));
+          return color.comp.some((compColor) => compHex === compColor.hex);
         }
       })
     );
